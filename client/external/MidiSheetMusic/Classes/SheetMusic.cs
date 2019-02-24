@@ -1115,12 +1115,13 @@ namespace MidiSheetMusic
 
             int x_shade = 0;
             int y_shade = 0;
+            int width = 0;
             int height = 0;
             
             foreach (Staff staff in staffs)
             {
                 g.TranslateTransform(0, ypos);
-                staff.ShadeNotes(g, brush, pen,
+                width += staff.ShadeNotes(g, brush, pen,
                                  currentPulseTime, prevPulseTime, ref x_shade);
                 g.TranslateTransform(0, -ypos);
                 ypos += staff.Height;
@@ -1142,7 +1143,7 @@ namespace MidiSheetMusic
             {
                 ScrollToShadedNotes(x_shade, y_shade, scrollGradually);
             }
-            return new Rectangle(x_shade, y_shade, 0, (int)(height * zoom));
+            return new Rectangle(x_shade, y_shade, width, (int)((height+8) * zoom));
         }
 
         /** Scroll the sheet music so that the shaded notes are visible.

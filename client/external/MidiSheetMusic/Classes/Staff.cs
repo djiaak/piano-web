@@ -479,8 +479,9 @@ namespace MidiSheetMusic
         /** Shade all the chords played in the given time.
          *  Un-shade any chords shaded in the previous pulse time.
          *  Store the x coordinate location where the shade was drawn.
+         *  Returns the width of the shaded rectangle
          */
-        public bool ShadeNotes(Graphics g, SolidBrush shadeBrush, Pen pen,
+        public int ShadeNotes(Graphics g, SolidBrush shadeBrush, Pen pen,
                            int currentPulseTime, int prevPulseTime, ref int x_shade)
         {
 
@@ -488,7 +489,7 @@ namespace MidiSheetMusic
             if ((starttime > prevPulseTime || endtime < prevPulseTime) &&
                 (starttime > currentPulseTime || endtime < currentPulseTime))
             {
-                return false;
+                return 0;
             }
 
             /* Skip the left side Clef symbol and key signature */
@@ -500,7 +501,7 @@ namespace MidiSheetMusic
              * Unshade symbols where start <= prevPulseTime < end
              * Shade symbols where start <= currentPulseTime < end
              */
-            bool shadedNoteFound = false;
+            int width = 0;
             for (int i = 0; i < symbols.Count; i++)
             {
                 curr = symbols[i];
@@ -534,7 +535,7 @@ namespace MidiSheetMusic
                         x_shade = xpos;
                     }
 
-                    return shadedNoteFound;
+                    return width;
                 }
                 /* If shaded notes are the same, we're done */
                 if ((start <= currentPulseTime) && (currentPulseTime < end) &&
@@ -542,7 +543,7 @@ namespace MidiSheetMusic
                 {
 
                     x_shade = xpos;
-                    return shadedNoteFound;
+                    return width;
                 }
 
                 /* If symbol is in the previous time, draw a white background */
@@ -556,16 +557,16 @@ namespace MidiSheetMusic
                 /* If symbol is in the current time, draw a shaded background */
                 if ((start <= currentPulseTime) && (currentPulseTime < end))
                 {
+                    width += curr.Width;
                     x_shade = xpos;
                     g.TranslateTransform(xpos, 0);
                     g.FillRectangle(shadeBrush, 0, 0, curr.Width, this.Height);
                     g.TranslateTransform(-xpos, 0);
-                    shadedNoteFound = true;
                 }
 
                 xpos += curr.Width;
             }
-            return shadedNoteFound;
+            return width;
         }
 
         /** Return the pulse time corresponding to the given point.

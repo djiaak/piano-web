@@ -17,6 +17,8 @@ export default class ShadeNotesCanvas extends React.Component {
 
   constructor(props) {
     super(props);
+
+    this.shadedNotesSet = new Set();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -27,6 +29,16 @@ export default class ShadeNotesCanvas extends React.Component {
       this.canvasShadeNotes.height = this.props.height;
     }
     if (this.props.shadedNotes !== prevProps.shadedNotes) {
+      const previousNotesSet = this.shadedNotesSet;
+      this.shadedNotesSet = new Set(
+        (this.props.shadedNotes || []).map(n => this.noteKey(n))
+      );
+      const toRemove = [...previousNotesSet]
+        .filter(n => !this.shadedNotesSet.has(n));
+      const toAdd = [...this.shadedNotesSet]
+        .filter(n => !previousNotesSet.has(n));
+      
+        
       this.props.shadedNotes.forEach(n => {
         const shadeRect = this.props.shadeNotesFunc && this.props.shadeNotesFunc(n.pulseTime, n.type);
         if (n.type === SHADE_NOTE_TYPE_SELECTION) {
@@ -37,23 +49,33 @@ export default class ShadeNotesCanvas extends React.Component {
         } 
       });
     }
-
+    // let difference = arrA
+    //              .filter(x => !arrB.includes(x))
+    //              .concat(arrB.filter(x => !arrA.includes(x)));
   }
 
+  noteKey = n => `${n.pulseTime}_${n.type}`;
+
   animate = (scrollOffset, playingPulseTime) => {
-    this.clearShadeNotes();
     const ctx = this.canvasShadeNotes.getContext('2d');
     ctx.translate(0, -scrollOffset);
 
-    this.props.shadedNotes && this.props.shadedNotes.forEach(n => {
-      this.props.shadeNotesFunc && this.props.shadeNotesFunc(n.pulseTime, n.type);
-    });
+    if (this.lastCurrentNoteShadeRect) {
+      ctx.clearRect(
+        this.lastCurrentNoteShadeRect.X,
+        this.lastCurrentNoteShadeRect.Y,
+        this.lastCurrentNoteShadeRect.Width,
+        this.lastCurrentNoteShadeRect.Height
+      );
+    }
+
     if (playingPulseTime >= 0) {
       const shadeRect = this.props.shadeNotesFunc &&
         this.props.shadeNotesFunc(playingPulseTime, SHADE_NOTE_TYPE_CURRENT);
 
       if (shadeRect && this.props.setCurrentNotePosition && this.lastNoteY !== shadeRect.Y) {
         this.props.setCurrentNotePosition(shadeRect.Y);
+        this.lastCurrentNoteShadeRect = shadeRect;
       }
     }
 
