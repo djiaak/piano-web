@@ -79,8 +79,7 @@ export default class ShadeNotesCanvas extends React.Component {
     };
   };
 
-  animate = (scrollOffset, playingPulseTime) => {
-    this.ctx.translate(0, -this.lastScrollOffset);
+  unshadePreviousNotes = () => {
     this.toRemove.forEach(key => {
       const { pulseTime, type } = this.noteFromKey(key);
       this.props.shadeNotesFunc &&
@@ -94,11 +93,9 @@ export default class ShadeNotesCanvas extends React.Component {
         this.lastCurrentNoteShadeRect.Height,
       );
     }
-    this.ctx.translate(0, this.lastScrollOffset);
+  }
 
-    this.ctx.translate(0, -scrollOffset);
-
-    
+  shadeNewNotes = playingPulseTime => {
     this.toAdd.forEach(key => {
       const { pulseTime, type } = this.noteFromKey(key);
       this.props.shadeNotesFunc &&
@@ -106,7 +103,6 @@ export default class ShadeNotesCanvas extends React.Component {
     });
     this.toAdd.length = 0;
     this.toRemove.length = 0;
-
 
     if (playingPulseTime >= 0) {
       const shadeRect =
@@ -126,7 +122,15 @@ export default class ShadeNotesCanvas extends React.Component {
         this.lastCurrentNoteShadeRect = shadeRect;
       }
     }
+  }
 
+  animate = (scrollOffset, playingPulseTime) => {
+    this.ctx.translate(0, -this.lastScrollOffset);
+    this.unshadePreviousNotes();
+    this.ctx.translate(0, this.lastScrollOffset);
+
+    this.ctx.translate(0, -scrollOffset);
+    this.shadeNewNotes(playingPulseTime);
     this.ctx.translate(0, scrollOffset);
 
     this.lastScrollOffset = scrollOffset;
