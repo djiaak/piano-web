@@ -1106,7 +1106,7 @@ namespace MidiSheetMusic
          *  If scrollGradually is true, scroll gradually (smooth scrolling)
          *  to the shaded notes. Returns the minimum y-coordinate of the shaded chord (for scrolling purposes)
          */
-        public Rectangle ShadeNotes(int currentPulseTime, int prevPulseTime, bool scrollGradually, SolidBrush brush)
+        public Rectangle ShadeNotes(int currentPulseTime, bool scrollGradually, SolidBrush brush)
         {
             Graphics g = CreateGraphics("shadeNotes");
             g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -1122,7 +1122,7 @@ namespace MidiSheetMusic
             {
                 g.TranslateTransform(0, ypos);
                 width += staff.ShadeNotes(g, brush, pen,
-                                 currentPulseTime, prevPulseTime, ref x_shade);
+                                 currentPulseTime, ref x_shade);
                 g.TranslateTransform(0, -ypos);
                 ypos += staff.Height;
                 if (currentPulseTime >= staff.EndTime)

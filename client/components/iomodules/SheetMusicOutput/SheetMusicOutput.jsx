@@ -19,6 +19,7 @@ import {
   SHADE_NOTE_TYPE_SELECTION,
   SHADE_NOTE_TYPE_HIT,
   SHADE_NOTE_TYPE_MISS,
+  SHADE_NOTE_TYPE_TRANSPARENT,
 } from '../../../constants/shadeNoteTypes';
 
 class SheetMusicOutput extends React.Component {
@@ -279,17 +280,20 @@ class SheetMusicOutput extends React.Component {
     const color =
       noteType === SHADE_NOTE_TYPE_CURRENT
         ? MidiSheetMusic.Color.FromArgb(128, 0, 128, 200)
+        : noteType === SHADE_NOTE_TYPE_SELECTION
+        ? MidiSheetMusic.Color.FromArgb(128, 128, 128, 128)
+        : noteType === SHADE_NOTE_TYPE_TRANSPARENT
+        ? MidiSheetMusic.Color.FromArgb(0, 0, 0, 0)
         : MidiSheetMusic.Color.FromArgb(128, 128, 128, 128);
-    return new MidiSheetMusic.SolidBrush(color);
+    return new MidiSheetMusic.SolidBrush.$ctor1(color);
   };
 
-  shadeNotesFunc = (pulseTime, type) => {
+  shadeNotesFunc = (pulseTime, type, clear) => {
     if (!this.sheetMusic) return null;
     return this.sheetMusic.ShadeNotes(
       pulseTime,
-      pulseTime - this.measure,
-      true,
-      this.generateBrush(type),
+      false,
+      clear ? MidiSheetMusic.SolidBrush.Clear : this.generateBrush(type),
     );
   };
 
@@ -309,7 +313,10 @@ class SheetMusicOutput extends React.Component {
             </button>
           )}
           <label
-            className={'label-input auto-scroll' + (this.props.autoScroll ? ' checked' : '') }
+            className={
+              'label-input auto-scroll' +
+              (this.props.autoScroll ? ' checked' : '')
+            }
           >
             <input
               type="checkbox"

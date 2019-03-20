@@ -482,12 +482,11 @@ namespace MidiSheetMusic
          *  Returns the width of the shaded rectangle
          */
         public int ShadeNotes(Graphics g, SolidBrush shadeBrush, Pen pen,
-                           int currentPulseTime, int prevPulseTime, ref int x_shade)
+                           int currentPulseTime, ref int x_shade)
         {
 
             /* If there's nothing to unshade, or shade, return */
-            if ((starttime > prevPulseTime || endtime < prevPulseTime) &&
-                (starttime > currentPulseTime || endtime < currentPulseTime))
+            if (starttime > currentPulseTime || endtime < currentPulseTime)
             {
                 return 0;
             }
@@ -528,7 +527,7 @@ namespace MidiSheetMusic
 
 
                 /* If we've past the previous and current times, we're done. */
-                if ((start > prevPulseTime) && (start > currentPulseTime))
+                if (start > currentPulseTime)
                 {
                     if (x_shade == 0)
                     {
@@ -537,22 +536,6 @@ namespace MidiSheetMusic
 
                     return width;
                 }
-                /* If shaded notes are the same, we're done */
-                if ((start <= currentPulseTime) && (currentPulseTime < end) &&
-                    (start <= prevPulseTime) && (prevPulseTime < end))
-                {
-
-                    x_shade = xpos;
-                    return width;
-                }
-
-                /* If symbol is in the previous time, draw a white background */
-                if ((start <= prevPulseTime) && (prevPulseTime < end))
-                {
-                    g.TranslateTransform(xpos - 2, -2);
-                    g.ClearRectangle(0, 0, curr.Width + 4, this.Height + 4);
-                    g.TranslateTransform(-(xpos - 2), 2);
-                }
 
                 /* If symbol is in the current time, draw a shaded background */
                 if ((start <= currentPulseTime) && (currentPulseTime < end))
@@ -560,7 +543,14 @@ namespace MidiSheetMusic
                     width += curr.Width;
                     x_shade = xpos;
                     g.TranslateTransform(xpos, 0);
-                    g.FillRectangle(shadeBrush, 0, 0, curr.Width, this.Height);
+                    if (shadeBrush.IsClear())
+                    {
+                        g.ClearRectangle(0, 0, curr.Width, this.Height);
+                    }
+                    else
+                    {
+                        g.FillRectangle(shadeBrush, 0, 0, curr.Width, this.Height);
+                    }
                     g.TranslateTransform(-xpos, 0);
                 }
 
